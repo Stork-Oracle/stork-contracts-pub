@@ -2,7 +2,7 @@ from web3 import Web3
 import os
 import sys
 
-CONTRACT_ADDRESS = "0x1e2922DcFc7922576Cc6DD68AD80CF345eaF15Ad"
+CONTRACT_ADDRESS = os.environ.get("VERIFY_CONTRACT_ADDRESS", "0x73d7E67F39a4f0831292e90aBA925d70E3432b28")
 GOERLI_PROVIDER = os.environ.get("GOERLI_PROVIDER")
 
 if GOERLI_PROVIDER is None:
@@ -19,93 +19,6 @@ V = 0x1b
 
 # abi copied from remix compiler/deployer
 abi = [
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "message",
-				"type": "bytes32"
-			}
-		],
-		"name": "getEthSignedMessageHash32",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "pure",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "oracle_name",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "asset_pair_id",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "getMessageHash",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "pure",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "signed_message_hash",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "bytes32",
-				"name": "r",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "bytes32",
-				"name": "s",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "uint8",
-				"name": "v",
-				"type": "uint8"
-			}
-		],
-		"name": "getSigner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "pure",
-		"type": "function"
-	},
 	{
 		"inputs": [
 			{
@@ -144,12 +57,12 @@ abi = [
 				"type": "uint8"
 			}
 		],
-		"name": "verifyMessage",
+		"name": "verifySignature",
 		"outputs": [
 			{
-				"internalType": "string",
+				"internalType": "bool",
 				"name": "",
-				"type": "string"
+				"type": "bool"
 			}
 		],
 		"stateMutability": "pure",
@@ -164,10 +77,10 @@ print("Contract: " + CONTRACT_ADDRESS)
 print("Functions:")
 [print("\t" + str(f)) for f in contract.all_functions()]
 
-print("Calling getMessageHash on contract " + CONTRACT_ADDRESS)
-msg_hash = contract.functions.getMessageHash(ORACLE_PUBKEY, ASSET_PAIR, TIMESTAMP, PRICE).call()
-print("\tmsg_hash: 0x" + msg_hash.hex())
+# print("Calling getMessageHash on contract " + CONTRACT_ADDRESS)
+# msg_hash = contract.functions.getMessageHash(ORACLE_PUBKEY, ASSET_PAIR, TIMESTAMP, PRICE).call()
+# print("\tmsg_hash: 0x" + msg_hash.hex())
 
-print("Calling verifyMessage on contract " + CONTRACT_ADDRESS)
-response = contract.functions.verifyMessage(ORACLE_PUBKEY, ASSET_PAIR, TIMESTAMP, PRICE, R, S, V).call()
-print("\tresponse: " + response)
+print("Calling verifySignature on contract " + CONTRACT_ADDRESS)
+response = contract.functions.verifySignature(ORACLE_PUBKEY, ASSET_PAIR, TIMESTAMP, PRICE, R, S, V).call()
+print("\tresponse: " + str(response))
