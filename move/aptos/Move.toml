@@ -1,0 +1,9 @@
+[package]
+name = "VerifySignature"
+version = "0.0.0"
+
+[addresses]
+verify_signature = "_"
+
+[dependencies]
+AptosFramework = { local = "./sdk/aptos-framework" }
