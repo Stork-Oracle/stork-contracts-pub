@@ -49,11 +49,15 @@ def generate_prefix_bytes():
 
 
 def bcs_serialize(PUBLIC_KEY, ASSET_PAIR, TIMESTAMP, PRICE):
+    hash = hashlib.sha3_256()
+
     ser.str(PUBLIC_KEY)  # how to serialize this type?
     ser.str(ASSET_PAIR)
     ser.u128(TIMESTAMP)
+    ser.u128(PRICE)
     # print(ser.output())
-    return ser.output()
+    hash.update(ser.output())
+    return hash.digest()
 
 
 def generate():
@@ -68,7 +72,7 @@ def generate():
     print(
         json.dumps(
             {
-                "oracle_name": PUBLIC_KEY,
+                "oracle_name": "move_oracle",
                 "asset_pair": ASSET_PAIR,
                 "timestamp": TIMESTAMP,
                 "price": PRICE,
