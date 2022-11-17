@@ -72,7 +72,7 @@ def generate():
     print(
         json.dumps(
             {
-                "oracle_name": "move_oracle",
+                "oracle_pubkey": PUBLIC_KEY,
                 "asset_pair": ASSET_PAIR,
                 "timestamp": TIMESTAMP,
                 "price": PRICE,

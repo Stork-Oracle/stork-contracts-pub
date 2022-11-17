@@ -7,3 +7,4 @@ verify_signature = "_"
 
 [dependencies]
 AptosFramework = { local = "./sdk/aptos-framework" }
+AptosStdlib = { local = "./sdk/aptos-stdlib" }
