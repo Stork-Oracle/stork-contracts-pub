@@ -1,8 +1,10 @@
 module VerifySigAddr::Verify{
 
     use 0x1::ed25519;
+    use 0x1::string;
+    use std::hash;
+    use 0x1::bcs;
 
-    // use 0x1::bcs;
     // use 0x1::hash;
     // use 0x1::option;
     // use 0x1::type_info;
@@ -39,15 +41,32 @@ module VerifySigAddr::Verify{
         // timestamp: u128, // u128 is the biggest type, no 256
         // price: u128,
         signature: vector<u8>,
-        message: vector<u8>
+        // message: vector<u8>
         // r: vector<u8>, // is bytes32 a vector?
         // s: vector<u8>,
         // v: u8
     ) : bool {
+        // let oracle_bytes = bcs::to_bytes(&oracle_pubkey);
+
+        let oracle_string = bcs::to_bytes(&string::utf8(b"0xf1a1a7a5706732b8026e5ccc5811b3392b3efbb6c7fa09e513b09f7bfe38edfd"));
+        let asset_pair_id = bcs::to_bytes(&string::utf8(b"ETHUSD"));
+        let price = bcs::to_bytes(&1472980000000000000000u128);
+        let timestamp = bcs::to_bytes(&1663309101u128);
+
+        let prefix = hash::sha3_256(b"APTOS::RawTransaction");
+
+        std::vector::append(&mut oracle_string, asset_pair_id);
+        std::vector::append(&mut oracle_string, timestamp);
+        std::vector::append(&mut oracle_string, price);
+
+        let bcs_hashed = hash::sha3_256(oracle_string);
+
+        std::vector::append(&mut prefix, bcs_hashed);
+
         let sig = ed25519::new_signature_from_bytes(signature);
         let public_key = ed25519::new_unvalidated_public_key_from_bytes(oracle_pubkey);
 
-        return ed25519::signature_verify_strict(&sig, &public_key, message)
+        return ed25519::signature_verify_strict(&sig, &public_key, prefix)
 
         
 
