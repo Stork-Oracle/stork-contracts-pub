@@ -1,20 +1,20 @@
 #[test_only]
 module VerifySigAddr::verify_tests {
   use VerifySigAddr::Verify;
-  // use std::string;
+  use 0x1::string;
+  // use 0x1::bcs;
 
   #[test]
   public entry fun verify_addr() {
 
-    let oracle_pubkey = x"f1a1a7a5706732b8026e5ccc5811b3392b3efbb6c7fa09e513b09f7bfe38edfd";
-    let signature= x"2f9b2ee794ae58cd1f7c362100e59cc0009966d94822d86fd4d5d83eddfb6d3382164f358bd8f70ee598f06eaa7d980a79921019415e5d60217ebbf2a0f7a902";
-    // let message = x"b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b193746fac5ce76b85ceff208e93455d7788210ab4c4529c962adb0fbae7bbafb09d";
-    // let asset_pair = string::utf8(b"ETHUSD")
-    // let price = 
-    // let timestamp: u128 = 
+    let oracle_string = string::utf8(b"0xf1a1a7a5706732b8026e5ccc5811b3392b3efbb6c7fa09e513b09f7bfe38edfd");
+    let asset_pair_id = string::utf8(b"ETHUSD");
+    let price: u128 = 1472980000000000000000;
+    let timestamp: u128 = 1663309101;
+    let signature = string::utf8(b"0x2f9b2ee794ae58cd1f7c362100e59cc0009966d94822d86fd4d5d83eddfb6d3382164f358bd8f70ee598f06eaa7d980a79921019415e5d60217ebbf2a0f7a902");
 
     assert!(
-      Verify::verify_signature(oracle_pubkey, signature) == true, 0
+      Verify::gen_and_verify_signature(oracle_string, asset_pair_id, price, timestamp, signature) == true, 0
     );
   }
 }
