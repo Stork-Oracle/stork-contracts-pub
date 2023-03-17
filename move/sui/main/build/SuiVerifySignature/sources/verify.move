@@ -77,6 +77,7 @@ module sui_verify_signature::verify{
 
         let padder = b"\x19Ethereum Signed Message:\n32";
 
+        std::vector::append(&mut padder, new_message);
         let double_packed  = hash::keccak256(&padder);
 
         debug::print(&pack);
@@ -89,7 +90,10 @@ module sui_verify_signature::verify{
         debug::print(&double_packed);
 
         // let response : vector<u8> = ecdsa_k1::erecover_to_eth_address_and_reply_2(signature, padder);
-        let response : vector<u8> = ecdsa_k1::erecover_to_eth_address_and_reply(signature, padder);
+        // let response : vector<u8> = ecdsa_k1::erecover_to_eth_address_and_reply(signature, padder);
+        let response : vector<u8> = ecdsa_k1::erecover_to_eth_address_and_reply_2(signature, padder);
+
+        debug::print(&response);
         // ecdsa_k1::secp256k1_verify(&signature, &double_packed, &oracle_string)
 
         (response == oracle_string)
@@ -132,7 +136,7 @@ module sui_verify_signature::verify{
         let price = x"0000000000000000000000000000000000000000000000000500c0d709874000";
         // let timestamp = x"641226cc";
         let timestamp = x"00000000000000000000000000000000000000000000000000000000641226cc";
-        let signature = b"0x25a434cbece35d96bed07995de0689442cdf102d34b91e64e20362e00160ffd14007c7528fa2164e0ed95b6ae89716d2eb929ea02101f09eb7822a8a68c968a81b";
+        let signature = x"25a434cbece35d96bed07995de0689442cdf102d34b91e64e20362e00160ffd14007c7528fa2164e0ed95b6ae89716d2eb929ea02101f09eb7822a8a68c968a81b";
 
         assert!(
              gen_and_verify_signature(oracle_string, asset_pair_id, price, timestamp, signature) == true, 0
