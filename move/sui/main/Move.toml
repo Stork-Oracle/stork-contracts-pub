@@ -1,0 +1,11 @@
+[package]
+name = "SuiVerifySignature"
+version = "0.0.1"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "releases/sui-v0.28.0-release" }
+Math = { local = "../math_lib" }
+
+[addresses]
+sui_verify_signature =  "0x0"
+
