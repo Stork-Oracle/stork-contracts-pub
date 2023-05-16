@@ -1,16 +1,21 @@
 module sui_verify_signature::verify{
     use sui::hash;
     use std::bcs;
-    use sui::event;
+    // use sui::event;
+    use sui::tx_context::{Self, TxContext};
+    use sui::transfer;
     use sui::ecdsa_k1;
     use std::vector;
+    use sui::object::{Self, UID};
+
 
     public entry fun verify_sig(
         oracle_string: vector<u8>, 
         asset_pair_id: vector<u8>, 
         price: u256, 
         timestamp: u256, 
-        signature: vector<u8>
+        signature: vector<u8>,
+        ctx: &mut TxContext
     ) {
 
         // Build the message from the components
@@ -30,7 +35,15 @@ module sui_verify_signature::verify{
         std::vector::append(&mut padder, hashed_message);
 
         let response : bool = erecover_to_eth_address_and_reply(signature, padder) == oracle_string;
-        event::emit(VerifiedEvent {is_verified: response});
+        // event::emit(VerifiedEvent {is_verified: response});
+
+        let addr_object = Output {
+            id: object::new(ctx),
+            value: response,
+        };
+
+        // Transfer an output data object holding the address to the recipient.
+        transfer::public_transfer(addr_object, tx_context::sender(ctx))
 
     }
 
@@ -44,6 +57,11 @@ module sui_verify_signature::verify{
 
     struct MyEvent has copy, drop {
         value: vector<u8>
+    }
+
+    struct Output has key, store {
+        id: UID,
+        value: bool
     }
 
     fun pack_u256(value_to_pack: u256) : vector<u8> {
