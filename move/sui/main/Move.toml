@@ -3,7 +3,7 @@ name = "SuiVerifySignature"
 version = "0.0.1"
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "releases/sui-v0.28.0-release" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
 Math = { local = "../math_lib" }
 
 [addresses]

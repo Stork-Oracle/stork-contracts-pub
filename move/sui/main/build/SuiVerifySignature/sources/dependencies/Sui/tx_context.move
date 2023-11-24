@@ -3,8 +3,6 @@
 
 module sui::tx_context {
 
-    friend sui::object;
-
     #[test_only]
     use std::vector;
 
@@ -41,6 +39,12 @@ module sui::tx_context {
         self.sender
     }
 
+    /// Return the transaction digest (hash of transaction inputs).
+    /// Please do not use as a source of randomness.
+    public fun digest(self: &TxContext): &vector<u8> {
+        &self.tx_hash
+    }
+
     /// Return the current epoch
     public fun epoch(self: &TxContext): u64 {
         self.epoch
@@ -51,14 +55,17 @@ module sui::tx_context {
        self.epoch_timestamp_ms
     }
 
-    /// Generate a new, globally unique object ID with version 0
-    public(friend) fun new_object(ctx: &mut TxContext): address {
+    /// Create an `address` that has not been used. As it is an object address, it will never
+    /// occur as the address for a user.
+    /// In other words, the generated address is a globally unique object ID.
+    public fun fresh_object_address(ctx: &mut TxContext): address {
         let ids_created = ctx.ids_created;
         let id = derive_id(*&ctx.tx_hash, ids_created);
         ctx.ids_created = ids_created + 1;
         id
     }
 
+    #[allow(unused_function)]
     /// Return the number of id's created by the current transaction.
     /// Hidden for now, but may expose later
     fun ids_created(self: &TxContext): u64 {
@@ -140,15 +147,4 @@ module sui::tx_context {
     public fun increment_epoch_timestamp(self: &mut TxContext, delta_ms: u64) {
         self.epoch_timestamp_ms = self.epoch_timestamp_ms + delta_ms
     }
-
-
-    // Cost calibration functions
-    #[test_only]
-    public fun calibrate_derive_id(tx_hash: vector<u8>, ids_created: u64) {
-        derive_id(tx_hash, ids_created);
-    }
-    #[test_only]
-    public fun calibrate_derive_id_nop(tx_hash: vector<u8>, ids_created: u64) {
-        let _ = tx_hash;
-        let _ = ids_created;
-    }}
+}

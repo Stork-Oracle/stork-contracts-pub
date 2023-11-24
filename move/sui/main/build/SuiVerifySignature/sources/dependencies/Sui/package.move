@@ -93,7 +93,7 @@ module sui::package {
     public fun claim<OTW: drop>(otw: OTW, ctx: &mut TxContext): Publisher {
         assert!(types::is_one_time_witness(&otw), ENotOneTimeWitness);
 
-        let type = type_name::get<OTW>();
+        let type = type_name::get_with_original_ids<OTW>();
 
         Publisher {
             id: object::new(ctx),
@@ -102,11 +102,12 @@ module sui::package {
         }
     }
 
+    #[lint_allow(self_transfer)]
     /// Claim a Publisher object and send it to transaction sender.
     /// Since this function can only be called in the module initializer,
     /// the sender is the publisher.
     public fun claim_and_keep<OTW: drop>(otw: OTW, ctx: &mut TxContext) {
-        sui::transfer::transfer(claim(otw, ctx), sender(ctx))
+        sui::transfer::public_transfer(claim(otw, ctx), sender(ctx))
     }
 
     /// Destroy a Publisher object effectively removing all privileges
@@ -118,14 +119,14 @@ module sui::package {
 
     /// Check whether type belongs to the same package as the publisher object.
     public fun from_package<T>(self: &Publisher): bool {
-        let type = type_name::get<T>();
+        let type = type_name::get_with_original_ids<T>();
 
         (type_name::get_address(&type) == self.package)
     }
 
     /// Check whether a type belongs to the same module as the publisher object.
     public fun from_module<T>(self: &Publisher): bool {
-        let type = type_name::get<T>();
+        let type = type_name::get_with_original_ids<T>();
 
         (type_name::get_address(&type) == self.package)
             && (type_name::get_module(&type) == self.module_name)
@@ -141,6 +142,15 @@ module sui::package {
         &self.package
     }
 
+    /// The ID of the package that this cap authorizes upgrades for.
+    /// Can be `0x0` if the cap cannot currently authorize an upgrade
+    /// because there is already a pending upgrade in the transaction.
+    /// Otherwise guaranteed to be the latest version of any given
+    /// package.
+    public fun upgrade_package(cap: &UpgradeCap): ID {
+        cap.package
+    }
+
     /// The most recent version of the package, increments by one for each
     /// successfully applied upgrade.
     public fun version(cap: &UpgradeCap): u64 {
@@ -151,6 +161,44 @@ module sui::package {
     /// `cap`.
     public fun upgrade_policy(cap: &UpgradeCap): u8 {
         cap.policy
+    }
+
+    /// The package that this ticket is authorized to upgrade
+    public fun ticket_package(ticket: &UpgradeTicket): ID {
+        ticket.package
+    }
+
+    /// The kind of upgrade that this ticket authorizes.
+    public fun ticket_policy(ticket: &UpgradeTicket): u8 {
+        ticket.policy
+    }
+
+    /// ID of the `UpgradeCap` that this `receipt` should be used to
+    /// update.
+    public fun receipt_cap(receipt: &UpgradeReceipt): ID {
+        receipt.cap
+    }
+
+    /// ID of the package that was upgraded to: the latest version of
+    /// the package, as of the upgrade represented by this `receipt`.
+    public fun receipt_package(receipt: &UpgradeReceipt): ID {
+        receipt.package
+    }
+
+    /// A hash of the package contents for the new version of the
+    /// package.  This ticket only authorizes an upgrade to a package
+    /// that matches this digest.  A package's contents are identified
+    /// by two things:
+    ///
+    ///  - modules: [[u8]]       a list of the package's module contents
+    ///  - deps:    [[u8; 32]]   a list of 32 byte ObjectIDs of the
+    ///                          package's transitive dependencies
+    ///
+    /// A package's digest is calculated as:
+    ///
+    ///   sha3_256(sort(modules ++ deps))
+    public fun ticket_digest(ticket: &UpgradeTicket): &vector<u8> {
+        &ticket.digest
     }
 
     /// Expose the constants representing various upgrade policies
@@ -189,8 +237,7 @@ module sui::package {
     public fun authorize_upgrade(
         cap: &mut UpgradeCap,
         policy: u8,
-        digest: vector<u8>,
-        _dummy_parameter: bool,
+        digest: vector<u8>
     ): UpgradeTicket {
         let id_zero = object::id_from_address(@0x0);
         assert!(cap.package != id_zero, EAlreadyAuthorized);
@@ -202,7 +249,7 @@ module sui::package {
         UpgradeTicket {
             cap: object::id(cap),
             package,
-            policy: cap.policy,
+            policy,
             digest,
         }
     }
@@ -225,7 +272,7 @@ module sui::package {
     #[test_only]
     /// Test-only function to claim a Publisher object bypassing OTW check.
     public fun test_claim<OTW: drop>(_: OTW, ctx: &mut TxContext): Publisher {
-        let type = type_name::get<OTW>();
+        let type = type_name::get_with_original_ids<OTW>();
 
         Publisher {
             id: object::new(ctx),

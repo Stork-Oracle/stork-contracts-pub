@@ -15,13 +15,10 @@ module sui::display {
     use sui::tx_context::{sender, TxContext};
     use sui::vec_map::{Self, VecMap};
     use sui::object::{Self, ID, UID};
-    use sui::transfer::transfer;
+    use sui::transfer;
     use sui::event;
     use std::vector;
     use std::string::String;
-
-    // Collectible is a special case to avoid storing `Publisher`.
-    friend sui::collectible;
 
     /// For when T does not belong to the package `Publisher`.
     const ENotOwner: u64 = 0;
@@ -86,13 +83,6 @@ module sui::display {
         create_internal(ctx)
     }
 
-    /// Protected method to create an empty Display for the `Collectible<T>`.
-    /// Similar result can be achieved by freezing the Publisher for the
-    /// Container package.
-    public(friend) fun new_protected<T: key>(ctx: &mut TxContext): Display<T> {
-        create_internal(ctx)
-    }
-
     /// Create a new Display<T> object with a set of fields.
     public fun new_with_fields<T: key>(
         pub: &Publisher, fields: vector<String>, values: vector<String>, ctx: &mut TxContext
@@ -112,9 +102,10 @@ module sui::display {
 
     // === Entry functions: Create ===
 
+    #[lint_allow(self_transfer)]
     /// Create a new empty Display<T> object and keep it.
     entry public fun create_and_keep<T: key>(pub: &Publisher, ctx: &mut TxContext) {
-        transfer(new<T>(pub, ctx), sender(ctx))
+        transfer::public_transfer(new<T>(pub, ctx), sender(ctx))
     }
 
     /// Manually bump the version and emit an event with the updated version's contents.
@@ -206,7 +197,7 @@ module sui::display {
 module sui::display_tests {
     use sui::object::UID;
     use sui::test_scenario as test;
-    use sui::transfer::transfer;
+    use sui::transfer;
     use std::string::{utf8, String};
     use sui::package;
     use sui::display;
@@ -235,7 +226,7 @@ module sui::display_tests {
         display::add(&mut display, utf8(b"description"), utf8(b"A Lovely Capy"));
 
         package::burn_publisher(pub);
-        transfer(display, @0x2);
+        transfer::public_transfer(display, @0x2);
         test::end(test);
     }
 }

@@ -6,7 +6,7 @@ compiled_package_info:
     std: "0000000000000000000000000000000000000000000000000000000000000001"
     sui: "0000000000000000000000000000000000000000000000000000000000000002"
     sui_verify_signature: "0000000000000000000000000000000000000000000000000000000000000000"
-  source_digest: A8C84F956046D05FF4130D814E92E20EBF970E4561994D4B92B90CBF9CA0748C
+  source_digest: B63F9C26B26D166B52805AE390B08FB8DB212CF6455AAFEE2B08C24F00280355
   build_flags:
     dev_mode: true
     test_mode: true
@@ -16,9 +16,11 @@ compiled_package_info:
     force_recompilation: false
     lock_file: ~
     additional_named_addresses: {}
-    architecture: ~
     fetch_deps_only: false
     skip_fetch_latest_git_deps: false
+    default_flavor: ~
+    default_edition: ~
+    deps_as_root: false
 dependencies:
   - Math
   - MoveStdlib

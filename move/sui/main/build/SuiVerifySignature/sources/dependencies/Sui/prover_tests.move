@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+#[test_only]
 module sui::prover_tests {
     use sui::object::UID;
 
@@ -13,7 +14,7 @@ module sui::prover_tests {
     // ====================================================================
 
     public fun simple_transfer(o: Obj, recipient: address) {
-        sui::transfer::transfer(o, recipient);
+        sui::transfer::public_transfer(o, recipient);
     }
 
     spec simple_transfer {
@@ -22,7 +23,7 @@ module sui::prover_tests {
     }
 
     public fun simple_share(o: Obj) {
-        sui::transfer::share_object(o)
+        sui::transfer::public_share_object(o)
     }
 
     spec simple_share {
@@ -31,7 +32,7 @@ module sui::prover_tests {
     }
 
     public fun simple_freeze(o: Obj) {
-        sui::transfer::freeze_object(o)
+        sui::transfer::public_freeze_object(o)
     }
 
     spec simple_freeze {

@@ -14,15 +14,12 @@ module sui::coin {
     use sui::transfer;
     use sui::url::{Self, Url};
     use std::vector;
-    use sui::event;
 
-    /// For when a type passed to create_supply is not a one-time witness.
+    /// A type passed to create_supply is not a one-time witness.
     const EBadWitness: u64 = 0;
-
-    /// For when invalid arguments are passed to a function.
+    /// Invalid arguments are passed to a function.
     const EInvalidArg: u64 = 1;
-
-    /// For when trying to split a coin more times than its balance allows.
+    /// Trying to split a coin more times than its balance allows.
     const ENotEnough: u64 = 2;
 
     /// A coin of type `T` worth `value`. Transferable and storable
@@ -57,19 +54,6 @@ module sui::coin {
         total_supply: Supply<T>
     }
 
-    // === Events ===
-
-    /// Emitted when new currency is created through the `create_currency` call.
-    /// Contains currency metadata for off-chain discovery. Type parameter `T`
-    /// matches the one in `Coin<T>`
-    struct CurrencyCreated<phantom T> has copy, drop {
-        /// Number of decimal places the coin uses.
-        /// A coin with `value ` N and `decimals` D should be shown as N / 10^D
-        /// E.g., a coin with `value` 7002 and decimals 3 should be displayed as 7.002
-        /// This is metadata for display usage only.
-        decimals: u8
-    }
-
     // === Supply <-> TreasuryCap morphing and accessors  ===
 
     /// Return the total number of `T`'s in circulation.
@@ -88,7 +72,7 @@ module sui::coin {
     }
 
     /// Get immutable reference to the treasury's `Supply`.
-    public fun supply<T>(treasury: &mut TreasuryCap<T>): &Supply<T> {
+    public fun supply_immut<T>(treasury: &TreasuryCap<T>): &Supply<T> {
         &treasury.total_supply
     }
 
@@ -260,11 +244,6 @@ module sui::coin {
         // Make sure there's only one instance of the type T
         assert!(sui::types::is_one_time_witness(&witness), EBadWitness);
 
-        // Emit Currency metadata as an event.
-        event::emit(CurrencyCreated<T> {
-            decimals
-        });
-
         (
             TreasuryCap {
                 id: object::new(ctx),
@@ -323,7 +302,7 @@ module sui::coin {
 
     /// Destroy the coin `c` and decrease the total supply in `cap`
     /// accordingly.
-    public fun burn<T>(cap: &mut TreasuryCap<T>, c: Coin<T>): u64 {
+    public entry fun burn<T>(cap: &mut TreasuryCap<T>, c: Coin<T>): u64 {
         let Coin { id, balance } = c;
         object::delete(id);
         balance::decrease_supply(&mut cap.total_supply, balance)
@@ -350,16 +329,7 @@ module sui::coin {
     public entry fun mint_and_transfer<T>(
         c: &mut TreasuryCap<T>, amount: u64, recipient: address, ctx: &mut TxContext
     ) {
-        transfer::transfer(mint(c, amount, ctx), recipient)
-    }
-
-    /// Burn a Coin and reduce the total_supply. Invokes `burn()`.
-    public entry fun burn_<T>(cap: &mut TreasuryCap<T>, c: Coin<T>) {
-        burn(cap, c);
-    }
-
-    spec burn_ {
-        include Burn<T>;
+        transfer::public_transfer(mint(c, amount, ctx), recipient)
     }
 
     // === Update coin metadata ===
@@ -430,5 +400,26 @@ module sui::coin {
     /// Mint coins of any type for (obviously!) testing purposes only
     public fun mint_for_testing<T>(value: u64, ctx: &mut TxContext): Coin<T> {
         Coin { id: object::new(ctx), balance: balance::create_for_testing(value) }
+    }
+
+    #[test_only]
+    /// Burn coins of any type for testing purposes only
+    public fun burn_for_testing<T>(coin: Coin<T>): u64 {
+        let Coin { id, balance } = coin;
+        object::delete(id);
+        balance::destroy_for_testing(balance)
+    }
+
+    // === Deprecated code ===
+
+    // oops, wanted treasury: &TreasuryCap<T>
+    public fun supply<T>(treasury: &mut TreasuryCap<T>): &Supply<T> {
+        &treasury.total_supply
+    }
+
+    // deprecated as we have CoinMetadata now
+    #[allow(unused_field)]
+    struct CurrencyCreated<phantom T> has copy, drop {
+        decimals: u8
     }
 }
