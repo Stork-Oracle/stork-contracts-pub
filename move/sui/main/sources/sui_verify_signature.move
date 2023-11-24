@@ -178,9 +178,6 @@ module sui_verify_signature::oracle {
     // debug::print(&recovered);
     // assert!(pk == recovered, 0);
 
-sui client call --function verify_sig --module verify --package 0x8907e9fc3b498804477944999e23a0519b1b95b54caa1d52a444429adbfafdf5 --args 51aa9e9c781f85a2c0636a835eb80114c4553098 XRPUSD 360500000000000000 1678911180 25a434cbece35d96bed07995de0689442cdf102d34b91e64e20362e00160ffd14007c7528fa2164e0ed95b6ae89716d2eb929ea02101f09eb7822a8a68c968a81b --gas-budget 100000000
-
-
 
         let admin_adress = @0xBABE;
 
