@@ -38,8 +38,8 @@ module sui_verify_signature::verify{
 
         debug::print(&oracle_string);
         debug::print(&asset_pair_id);
-        debug::print(price);
-        debug::print(timestamp);
+        debug::print(&price);
+        debug::print(&timestamp);
         debug::print(&signature);
 
         let response : bool = erecover_to_eth_address_and_reply(signature, padder) == oracle_string;
