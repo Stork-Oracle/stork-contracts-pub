@@ -36,8 +36,11 @@ module sui_verify_signature::verify{
         // Combine the message and the prefix
         std::vector::append(&mut padder, hashed_message);
 
-        debug::print(&padder);
         debug::print(&oracle_string);
+        debug::print(&asset_pair_id);
+        debug::print(price);
+        debug::print(timestamp);
+        debug::print(&signature);
 
         let response : bool = erecover_to_eth_address_and_reply(signature, padder) == oracle_string;
         // event::emit(VerifiedEvent {is_verified: response});
@@ -85,8 +88,6 @@ module sui_verify_signature::verify{
         } else if (*v > 35) {
             *v = (*v - 1) % 2;
         };
-        debug::print(&raw_msg);
-        debug::print(&signature);
         let pubkey = ecdsa_k1::secp256k1_ecrecover(&signature, &raw_msg, 1);
         let uncompressed = ecdsa_k1::decompress_pubkey(&pubkey);
 
