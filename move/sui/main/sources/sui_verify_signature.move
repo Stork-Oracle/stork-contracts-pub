@@ -21,7 +21,7 @@ module sui_verify_signature::verify{
     ) {
 
         // Build the message from the components
-        let pack = std::vector::empty<u8>(); 
+        let pack = std::vector::empty<u8>();
         std::vector::append(&mut pack, oracle_string);
         std::vector::append(&mut pack, asset_pair_id);
         std::vector::append(&mut pack, pack_u256(timestamp));
@@ -49,6 +49,7 @@ module sui_verify_signature::verify{
             id: object::new(ctx),
             value: response,
         };
+        debug::print(&response);
 
         // Transfer an output data object holding the address to the recipient.
         transfer::public_transfer(addr_object, tx_context::sender(ctx))
@@ -190,11 +191,11 @@ module sui_verify_signature::oracle {
         // F2e72022EB19352f488526E835c4b17248Aa6c03
         // f2e72022eb19352f488526e835c4b17248aa6c03
 
-        svs::verify_sig(b"0x51aa9e9c781f85a2c0636a835eb80114c4553098", b"XRPUSD", 360500000000000000, 1678911180, b"25a434cbece35d96bed07995de0689442cdf102d34b91e64e20362e00160ffd14007c7528fa2164e0ed95b6ae89716d2eb929ea02101f09eb7822a8a68c968a81b", test_scenario::ctx(scenario) );
-
-        // svs::verify_sig(x"51aa9e9c781f85a2c0636a835eb80114c4553098", b"XRPUSD", 360500000000000000, 1678911180, x"25a434cbece35d96bed07995de0689442cdf102d34b91e64e20362e00160ffd14007c7528fa2164e0ed95b6ae89716d2eb929ea02101f09eb7822a8a68c968a81b", test_scenario::ctx(scenario) );
-
         svs::verify_sig(x"51aa9e9c781f85a2c0636a835eb80114c4553098", b"XRPUSD", 360500000000000000, 1678911180, x"25a434cbece35d96bed07995de0689442cdf102d34b91e64e20362e00160ffd14007c7528fa2164e0ed95b6ae89716d2eb929ea02101f09eb7822a8a68c968a81b", test_scenario::ctx(scenario) );
+
+        // svs::verify_sig(x"51aa9e9c781f85a2c0636a835eb80114c4553098", b"XRPUSD", 360500000000000000, 1678911180, x"0x25a434cbece35d96bed07995de0689442cdf102d34b91e64e20362e00160ffd14007c7528fa2164e0ed95b6ae89716d2eb929ea02101f09eb7822a8a68c968a81b", test_scenario::ctx(scenario) );
+
+        //svs::verify_sig(x"51aa9e9c781f85a2c0636a835eb80114c4553098", b"XRPUSD", 360500000000000000, 1678911180, x"25a434cbece35d96bed07995de0689442cdf102d34b91e64e20362e00160ffd14007c7528fa2164e0ed95b6ae89716d2eb929ea02101f09eb7822a8a68c968a81b", test_scenario::ctx(scenario) );
 
         test_scenario::next_tx(scenario, admin_adress);
 
