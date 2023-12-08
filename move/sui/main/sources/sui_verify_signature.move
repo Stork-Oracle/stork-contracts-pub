@@ -18,7 +18,7 @@ module sui_verify_signature::verify{
         timestamp: u256, 
         signature: vector<u8>,
         ctx: &mut TxContext
-    ) : bool{
+    ) {
 
         // Build the message from the components
         let pack = std::vector::empty<u8>();
@@ -53,8 +53,6 @@ module sui_verify_signature::verify{
 
         // Transfer an output data object holding the address to the recipient.
         transfer::public_transfer(addr_object, tx_context::sender(ctx))
-
-        //response
 
     }
 
