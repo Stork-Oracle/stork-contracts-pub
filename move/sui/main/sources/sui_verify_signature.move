@@ -18,7 +18,7 @@ module sui_verify_signature::verify{
         timestamp: u256, 
         signature: vector<u8>,
         ctx: &mut TxContext
-    ) {
+    ) : bool{
 
         // Build the message from the components
         let pack = std::vector::empty<u8>();
@@ -53,6 +53,8 @@ module sui_verify_signature::verify{
 
         // Transfer an output data object holding the address to the recipient.
         transfer::public_transfer(addr_object, tx_context::sender(ctx))
+
+        response
 
     }
 
@@ -89,7 +91,7 @@ module sui_verify_signature::verify{
         } else if (*v > 35) {
             *v = (*v - 1) % 2;
         };
-        let pubkey = ecdsa_k1::secp256k1_ecrecover(&signature, &raw_msg, 1);
+        let pubkey = ecdsa_k1::secp256k1_ecrecover(&signature, &raw_msg, 0);
         let uncompressed = ecdsa_k1::decompress_pubkey(&pubkey);
 
 
