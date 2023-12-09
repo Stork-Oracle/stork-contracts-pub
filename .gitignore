@@ -4,3 +4,4 @@
 
 ../build
 move/sui/main/build
+move/sui/math_lib/build
